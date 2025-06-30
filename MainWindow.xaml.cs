@@ -32,10 +32,12 @@ namespace OfficeTest
     public partial class MainWindow : Window
     {
         /// <summary>
-        /// created on: 22.01.24
-        /// last edit: 15.10.24
+        /// created on: 16.06.25
+        /// last edit: 16.06.25
         /// </summary>
-        Version version = new Version("1.0.3");
+        Version version = new Version("1.0.1");
+        List<Account> bankAccounts = new List<Account>();
+
         /// <summary>
         /// standard constructor
         /// </summary>
@@ -43,7 +45,38 @@ namespace OfficeTest
         {
             InitializeComponent();
 
-            Display("Init ... ok");
+            bankAccounts.Add(
+                new Account
+                {
+                    ID = 345,
+                    Balance = 541.27
+                } );
+            bankAccounts.Add(
+                new Account
+                {
+                    ID = 123,
+                    Balance = -127.44
+                } );
+
+            Display( "Init ... ok" );
+            
+            DisplayInExcel( bankAccounts, ( account, cell ) =>
+            // This multiline lambda expression sets custom processing rules
+            // for the bankAccounts.
+            {
+                cell.Value = account.ID;
+                cell.Offset[ 0, 1 ].Value = account.Balance;
+                if ( account.Balance < 0 )
+                {
+                    cell.Interior.Color = 255;
+                    cell.Offset[ 0, 1 ].Interior.Color = 255;
+                }
+            } );
+
+            var wordApp = new Word.Application();
+            wordApp.Visible = true;
+            wordApp.Documents.Add();
+            wordApp.Selection.PasteSpecial( Link: true, DisplayAsIcon: false );
 
         }   // end: public MainWindow
 
@@ -115,6 +148,29 @@ namespace OfficeTest
             Display(obj.ToString());
 
         }   // end: Display
+
+        void DisplayInExcel( IEnumerable<Account> accounts,
+                   Action<Account, Excel.Range> DisplayFunc )
+        {
+            var excelApp = new Excel.Application();
+            // Add a new Excel workbook.
+            excelApp.Workbooks.Add();
+            excelApp.Visible = true;
+            excelApp.Range[ "A1" ].Value = "ID";
+            excelApp.Range[ "B1" ].Value = "Balance";
+            excelApp.Range[ "A2" ].Select();
+
+            foreach ( var ac in accounts )
+            {
+                DisplayFunc( ac, excelApp.ActiveCell );
+                excelApp.ActiveCell.Offset[ 1, 0 ].Select();
+            }
+            // Copy the results to the Clipboard.
+            excelApp.Range[ "A1:B3" ].Copy();
+
+            excelApp.Columns[ 1 ].AutoFit();
+            excelApp.Columns[ 2 ].AutoFit();
+        }
 
     }   // end: class MainWindow
 
