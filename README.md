@@ -1,7 +1,11 @@
-# EmptyWPFwithScroll
-Every time i started a new project i needed to do this for the frame in windows. Finally here it is - my copy&paste template for a new WPF-project with a 'Display' as console output.  
-With Java i did happen to use the Apache Server and he closed everything even the console output. So i started to have such outputs in my Java FXML programs.  
-As i am fond of C# and only use this anymore i dearly needed that for C#.  
+# <u>Project: OfficeTest</u>
 
 
-Make it to a project template under 'Project -> export template'. There you take the whole project and add a few words for your convenience. Visual Studio will add it to your local templates and you can start to use it.
+
+This demo program is made for my other project 'DbaseFrame'. 
+
+I want to use the Interop-coms for office. Being practical small to write the needed script i found out about some problems in handling these com classes.
+
+December 2024 they changed the debugger- he runs now in lazy mode. From the beginning i wasn't pleased about that, because an added 'using ...' can give you enormous errors. 
+
+In this example you have the UI done in WPF. Trying to use the com-classes for office shows that Office must be scripted with a visual language. It starts with the UI's partial class 'MainWindow' derived from 'Window'. Both the Excel and the Word com classes have a 'Window' too, leading to an amount of errors. This problem made me drop the 'using ... '-statement for the interop classes. I think you can't 
