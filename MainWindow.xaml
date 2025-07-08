@@ -12,6 +12,8 @@
             <MenuItem Header="_File">
                 <MenuItem Header="_Quit" Click="MenuQuit_Click"/>
             </MenuItem>
+            <MenuItem Header="Excel beschicken" Click="MenuExcel_Click"/>
+            <MenuItem Header="Word Clipboard-Daten" Click="MenuWord_Click" />
         </Menu>
         <ScrollViewer x:Name="textScroll" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto" DockPanel.Dock="Top" Margin="10">
             <TextBlock x:Name="textBlock" TextWrapping="Wrap" HorizontalAlignment="Left" Margin="10"/>

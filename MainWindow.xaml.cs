@@ -16,13 +16,13 @@
 ==================================================================== */
 
 
-// Ignore Spelling: Fwith
-
-using System.Windows;
 using System.Collections.Generic;
-using Excel = Microsoft.Office.Interop.Excel;
-using Word = Microsoft.Office.Interop.Word;
-using Access = Microsoft.Office.Interop.Access;
+using System.Windows;
+
+using Microsoft.Office.Interop.Access;
+//using Microsoft.Office.Interop.Excel;
+//using Microsoft.Office.Interop.Word;
+
 
 namespace OfficeTest
 {
@@ -33,10 +33,15 @@ namespace OfficeTest
     {
         /// <summary>
         /// created on: 16.06.25
-        /// last edit: 16.06.25
+        /// last edit: 08.07.25
         /// </summary>
-        Version version = new Version("1.0.1");
-        List<Account> bankAccounts = new List<Account>();
+        System.Version version = new System.Version("1.0.3");
+
+        Microsoft.Office.Interop.Word.Application wordApp = 
+            new Microsoft.Office.Interop.Word.Application();
+        Microsoft.Office.Interop.Excel.Application excelApp = 
+            new Microsoft.Office.Interop.Excel.Application();
+        Microsoft.Office.Interop.Excel.Workbook workbook;
 
         /// <summary>
         /// standard constructor
@@ -44,39 +49,12 @@ namespace OfficeTest
         public MainWindow()
         {
             InitializeComponent();
-
-            bankAccounts.Add(
-                new Account
-                {
-                    ID = 345,
-                    Balance = 541.27
-                } );
-            bankAccounts.Add(
-                new Account
-                {
-                    ID = 123,
-                    Balance = -127.44
-                } );
+            Closing += Window_Closing;
 
             Display( "Init ... ok" );
-            
-            DisplayInExcel( bankAccounts, ( account, cell ) =>
-            // This multiline lambda expression sets custom processing rules
-            // for the bankAccounts.
-            {
-                cell.Value = account.ID;
-                cell.Offset[ 0, 1 ].Value = account.Balance;
-                if ( account.Balance < 0 )
-                {
-                    cell.Interior.Color = 255;
-                    cell.Offset[ 0, 1 ].Interior.Color = 255;
-                }
-            } );
-
-            var wordApp = new Word.Application();
-            wordApp.Visible = true;
-            wordApp.Documents.Add();
-            wordApp.Selection.PasteSpecial( Link: true, DisplayAsIcon: false );
+            Display("Menüpunkt 'Excel beschicken' erstellt ein Double-Feld und sichert es in Excel.\n");
+            Display("Menüpunkt 'Word Clipboard-Daten' nimmt aus der Excelfunktion" +
+                " die Clipboard-Daten in ein Word-Dokument.\n");
 
         }   // end: public MainWindow
 
@@ -87,6 +65,12 @@ namespace OfficeTest
         /// <param name="e">send parameter from it</param>
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            excelApp.Quit();
+            
+            wordApp.Quit(
+                Microsoft.Office.Interop.Word.WdSaveOptions.wdDoNotSaveChanges,
+                Microsoft.Office.Interop.Word.WdOriginalFormat.wdWordDocument,
+                false );
 
         }   // end: private void Window_Closing
 
@@ -149,28 +133,67 @@ namespace OfficeTest
 
         }   // end: Display
 
-        void DisplayInExcel( IEnumerable<Account> accounts,
-                   Action<Account, Excel.Range> DisplayFunc )
+        // ---------------------------------------------------  main functions
+
+        private void MenuExcel_Click(object sender, RoutedEventArgs e)
         {
-            var excelApp = new Excel.Application();
             // Add a new Excel workbook.
-            excelApp.Workbooks.Add();
+            workbook = excelApp.Workbooks.Add();
             excelApp.Visible = true;
-            excelApp.Range[ "A1" ].Value = "ID";
-            excelApp.Range[ "B1" ].Value = "Balance";
-            excelApp.Range[ "A2" ].Select();
+            excelApp.Range["A1"].Value = "Feld X";
+            excelApp.Range["B1"].Value = "Feld Y";
+            //excelApp.Range["A2"].Select();
 
-            foreach ( var ac in accounts )
+            double[,] feldDoubles = new double[2, 2]
+                        { { 2.5, 3.6 },
+                        { 7.3, 9.6 } };
+            excelApp.Range["A2:B3"].Value = feldDoubles;
+
+            excelApp.Columns[1].AutoFit();
+            excelApp.Columns[2].AutoFit();
+
+            try
             {
-                DisplayFunc( ac, excelApp.ActiveCell );
-                excelApp.ActiveCell.Offset[ 1, 0 ].Select();
-            }
-            // Copy the results to the Clipboard.
-            excelApp.Range[ "A1:B3" ].Copy();
+                workbook.SaveAs(
+                    "C:\\Users\\marct\\Downloads\\neueExcels", 
+                    Microsoft.Office.Interop.Excel.XlFileFormat.xlWorkbookDefault, 
+                    Type.Missing,               // password
+                    Type.Missing,               // WriteResPassword
+                    false,                      // ReadOnlyRecommended
+                    false,                      // CreateBackup
+                    Microsoft.Office.Interop.Excel.XlSaveAsAccessMode.xlNoChange,
+                    Type.Missing,               // ConflictResolution
+                    Type.Missing,               // AddToMru
+                    Type.Missing,               // TextCodepage
+                    Type.Missing,               // TextVisualLayout
+                    Type.Missing                // Local
+                    );
 
-            excelApp.Columns[ 1 ].AutoFit();
-            excelApp.Columns[ 2 ].AutoFit();
-        }
+            }
+            catch( Exception ex ) 
+            {
+                Display("MenuExcel_Click: Fehler beim Speichern -> " + ex.Message);
+
+            }
+
+
+
+            // Copy the results to the Clipboard.
+            excelApp.Range["A1:B3"].Copy();
+
+
+        }   // end: MenuExcel_Click
+
+        private void MenuWord_Click(object sender, RoutedEventArgs e)
+        {
+
+            wordApp.Visible = true;
+            wordApp.Documents.Add();
+            wordApp.Selection.PasteSpecial(Link: true, DisplayAsIcon: false);
+            //wordApp.Documents.Save("C:\\Users\\marct\\Downloads\\neueWords.docx");
+
+
+        }   // end: MenuWord_Click
 
     }   // end: class MainWindow
 
