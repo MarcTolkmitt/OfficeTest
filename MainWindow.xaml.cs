@@ -16,10 +16,12 @@
 ==================================================================== */
 
 
+using Microsoft.Office.Core;
+using Microsoft.Office.Interop.Word;
 using System.Collections.Generic;
 using System.Windows;
 
-using Microsoft.Office.Interop.Access;
+//using Microsoft.Office.Interop.Access;
 //using Microsoft.Office.Interop.Excel;
 //using Microsoft.Office.Interop.Word;
 
@@ -33,12 +35,14 @@ namespace OfficeTest
     {
         /// <summary>
         /// created on: 16.06.25
-        /// last edit: 08.07.25
+        /// last edit: 09.07.25
         /// </summary>
-        System.Version version = new System.Version("1.0.3");
+        System.Version version = new System.Version("1.0.4");
 
         Microsoft.Office.Interop.Word.Application wordApp = 
             new Microsoft.Office.Interop.Word.Application();
+        Microsoft.Office.Interop.Word.Document wordDocument =
+            new Microsoft.Office.Interop.Word.Document();
         Microsoft.Office.Interop.Excel.Application excelApp = 
             new Microsoft.Office.Interop.Excel.Application();
         Microsoft.Office.Interop.Excel.Workbook workbook;
@@ -51,7 +55,7 @@ namespace OfficeTest
             InitializeComponent();
             Closing += Window_Closing;
 
-            Display( "Init ... ok" );
+            Display( "Init ... ok\n" );
             Display("Menüpunkt 'Excel beschicken' erstellt ein Double-Feld und sichert es in Excel.\n");
             Display("Menüpunkt 'Word Clipboard-Daten' nimmt aus der Excelfunktion" +
                 " die Clipboard-Daten in ein Word-Dokument.\n");
@@ -188,10 +192,27 @@ namespace OfficeTest
         {
 
             wordApp.Visible = true;
-            wordApp.Documents.Add();
+            wordDocument = wordApp.Documents.Add();
             wordApp.Selection.PasteSpecial(Link: true, DisplayAsIcon: false);
-            //wordApp.Documents.Save("C:\\Users\\marct\\Downloads\\neueWords.docx");
-
+            wordDocument.SaveAs2(
+                "C:\\Users\\marct\\Downloads\\neueWords.docx",
+                WdSaveFormat.wdFormatXMLDocument,
+                false,      // LockComments
+                "",         // Password
+                true,       // AddToRecentFiles
+                "",         // WritePassword
+                false,      // ReadOnlyRecommended
+                false,      // EmbedTrueTypeFonts
+                true,       // SaveNativePictureFormat
+                false,      // SaveFormsData
+                false,      // SaveAsAOCELetter
+                MsoEncoding.msoEncodingAutoDetect,
+                false,      // InsertLineBreaks
+                false,      // AllowSubstitutions
+                WdLineEndingType.wdCRLF,
+                true        // AddBiDiMarks
+                );
+            
 
         }   // end: MenuWord_Click
 
