@@ -16,15 +16,8 @@
 ==================================================================== */
 
 
-using Microsoft.Office.Core;
-using Microsoft.Office.Interop.Word;
 using System.Collections.Generic;
 using System.Windows;
-
-//using Microsoft.Office.Interop.Access;
-//using Microsoft.Office.Interop.Excel;
-//using Microsoft.Office.Interop.Word;
-
 
 namespace OfficeTest
 {
@@ -35,9 +28,9 @@ namespace OfficeTest
     {
         /// <summary>
         /// created on: 16.06.25
-        /// last edit: 09.07.25
+        /// last edit: 10.07.25
         /// </summary>
-        System.Version version = new System.Version("1.0.4");
+        System.Version version = new System.Version("1.0.5");
 
         Microsoft.Office.Interop.Word.Application wordApp = 
             new Microsoft.Office.Interop.Word.Application();
@@ -155,8 +148,10 @@ namespace OfficeTest
 
             excelApp.Columns[1].AutoFit();
             excelApp.Columns[2].AutoFit();
+            excelApp.DisplayAlerts = false;
 
-            try
+            bool saveOk = workbook.Saved;
+            if ( !saveOk)  try
             {
                 workbook.SaveAs(
                     "C:\\Users\\marct\\Downloads\\neueExcels", 
@@ -194,25 +189,34 @@ namespace OfficeTest
             wordApp.Visible = true;
             wordDocument = wordApp.Documents.Add();
             wordApp.Selection.PasteSpecial(Link: true, DisplayAsIcon: false);
-            wordDocument.SaveAs2(
-                "C:\\Users\\marct\\Downloads\\neueWords.docx",
-                WdSaveFormat.wdFormatXMLDocument,
-                false,      // LockComments
-                "",         // Password
-                true,       // AddToRecentFiles
-                "",         // WritePassword
-                false,      // ReadOnlyRecommended
-                false,      // EmbedTrueTypeFonts
-                true,       // SaveNativePictureFormat
-                false,      // SaveFormsData
-                false,      // SaveAsAOCELetter
-                MsoEncoding.msoEncodingAutoDetect,
-                false,      // InsertLineBreaks
-                false,      // AllowSubstitutions
-                WdLineEndingType.wdCRLF,
-                true        // AddBiDiMarks
+            bool saveOk = wordDocument.Saved;
+            if (!saveOk) try
+            {
+                wordDocument.SaveAs2(
+                    "C:\\Users\\marct\\Downloads\\neueWords.docx",
+                    Microsoft.Office.Interop.Word.WdSaveFormat.wdFormatXMLDocument,
+                    false,      // LockComments
+                    "",         // Password
+                    true,       // AddToRecentFiles
+                    "",         // WritePassword
+                    false,      // ReadOnlyRecommended
+                    false,      // EmbedTrueTypeFonts
+                    true,       // SaveNativePictureFormat
+                    false,      // SaveFormsData
+                    false,      // SaveAsAOCELetter
+                    Microsoft.Office.Core.MsoEncoding.msoEncodingAutoDetect,        // 50001
+                    false,      // InsertLineBreaks
+                    false,      // AllowSubstitutions
+                    Microsoft.Office.Interop.Word.WdLineEndingType.wdCRLF,
+                    true        // AddBiDiMarks
                 );
-            
+
+            }
+            catch (Exception ex)
+            {
+                Display("MenuWord_Click: Fehler beim Speichern -> " + ex.Message);
+
+            }
 
         }   // end: MenuWord_Click
 

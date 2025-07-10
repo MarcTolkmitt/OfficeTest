@@ -10,7 +10,7 @@ December 2024 they changed the debugger- he runs now in lazy mode. From the begi
 
 In this example you have the UI done in WPF. Trying to use the com-classes for office shows that Office must be scripted with a visual language from Microsoft. It starts with the UI's partial class 'MainWindow' derived from 'Window'. Both the Excel and the Word com classes have a 'Window' too, leading to an amount of errors. This problem made me drop the 'using ... '-statement for the interop classes. 
 
-I even think you can't change that decisiion for any other project because of the debugger being lazy. Better secure and working than ignoring possible mistakes.
+I even think you can't change that decision for any other projects because of the debugger being lazy. Better stay secure and working than ignoring possible mistakes.
 
 On interest you should watch the project 'DbaseFrame'.
 
