@@ -18,6 +18,8 @@
 
 using System.Collections.Generic;
 using System.Windows;
+using System.Windows.Input;
+using Excel = Microsoft.Office.Interop.Excel;
 
 namespace OfficeTest
 {
@@ -62,6 +64,8 @@ namespace OfficeTest
         /// <param name="e">send parameter from it</param>
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            //workbook.SaveAs(output, Excel.XlFileFormat.xlOpenXMLWorkbook);
+            //workbook.Close( true, Filename );
             excelApp.Quit();
             
             wordApp.Quit(
