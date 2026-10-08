@@ -14,3 +14,41 @@ I even think you can't change that decision for any other projects because of th
 
 On interest you should watch the project 'DbaseFrame'.
 
+
+
+### 1. Usage
+
+```c#
+using Excel = Microsoft.Office.Interop.Excel;
+```
+
+You need to add the com-type to the dependencies:
+
+​	"Microsoft Excel 16.0 Object Library"
+
+later you can have your fields in the program:
+
+```c#
+        Microsoft.Office.Interop.Excel.Application excelApp = 
+            new Microsoft.Office.Interop.Excel.Application();
+        Microsoft.Office.Interop.Excel.Workbook workbook;
+```
+
+
+
+### 2.error sources
+
+Invoking the menu buttons more than once will give you more than one excel or word instance. I didn't mind to manage that case - you will have to close them manually after quitting the program. 
+
+To manage that situation you can use such a code while using a list of interops:
+
+```c#
+          if (excelApp != null)
+            {
+                excelApp.Quit();
+                Marshal.ReleaseComObject(excelApp);
+            }
+```
+
+
+

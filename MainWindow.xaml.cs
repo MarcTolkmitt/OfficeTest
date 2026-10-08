@@ -66,12 +66,19 @@ namespace OfficeTest
         {
             //workbook.SaveAs(output, Excel.XlFileFormat.xlOpenXMLWorkbook);
             //workbook.Close( true, Filename );
-            excelApp.Quit();
-            
-            wordApp.Quit(
-                Microsoft.Office.Interop.Word.WdSaveOptions.wdDoNotSaveChanges,
-                Microsoft.Office.Interop.Word.WdOriginalFormat.wdWordDocument,
-                false );
+            try
+            {
+                excelApp.Quit();
+
+                wordApp.Quit(
+                    Microsoft.Office.Interop.Word.WdSaveOptions.wdDoNotSaveChanges,
+                    Microsoft.Office.Interop.Word.WdOriginalFormat.wdWordDocument,
+                    false );
+
+            } catch( Exception exe )
+            {
+                Display( exe.Message );
+            }
 
         }   // end: private void Window_Closing
 
@@ -179,13 +186,47 @@ namespace OfficeTest
 
             }
 
+            // die Daten auslesen
+            Excel.Range usedRange = excelApp.ActiveSheet.UsedRange;
+            int rowCount = usedRange.Rows.Count;
+            int colCount = usedRange.Columns.Count;
 
+            int startRow = usedRange.Row;
+            int startCol = usedRange.Column;
+            int endRow = startRow + rowCount - 1;
+            int endCol = startCol + colCount - 1;
 
+            Display( "benutzter Bereich:" );
+            Display( "Reihen: " + rowCount );
+            Display( "Reihen: " + startRow + " bis " + endRow );
+            Display( "Spalten: " + colCount );
+            Display( "Spalten: " + startCol + " bis " + endCol );
+            char buchstabe = 'A';
+            char buchstabe2 = buchstabe;
+            buchstabe2++;
+            Display( buchstabe + " -> " + buchstabe2 );
+            Display( "Spalte 28 -> " + GetColNameFromIndex( 28 ) );
             // Copy the results to the Clipboard.
             excelApp.Range["A1:B3"].Copy();
 
 
         }   // end: MenuExcel_Click
+
+        public static string GetColNameFromIndex( int columnNumber )
+        {
+            int dividend = columnNumber;
+            string columnName = String.Empty;
+            int modulo;
+
+            while ( dividend > 0 )
+            {
+                modulo = ( dividend - 1 ) % 26;
+                columnName = Convert.ToChar( 65 + modulo ).ToString() + columnName;
+                dividend = (int)( ( dividend - modulo ) / 26 );
+            }
+
+            return columnName;
+        }
 
         private void MenuWord_Click(object sender, RoutedEventArgs e)
         {
