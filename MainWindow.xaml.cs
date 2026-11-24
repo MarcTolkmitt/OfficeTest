@@ -48,7 +48,9 @@ namespace OfficeTest
         public MainWindow()
         {
             InitializeComponent();
-            Closing += Window_Closing;
+            // Closing is already wired in MainWindow.xaml
+
+            LoadWindowSettings();
 
             Display( "Init ... ok\n" );
             Display("Menüpunkt 'Excel beschicken' erstellt ein Double-Feld und sichert es in Excel.\n");
@@ -64,6 +66,8 @@ namespace OfficeTest
         /// <param name="e">send parameter from it</param>
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            SaveWindowSettings();
+
             //workbook.SaveAs(output, Excel.XlFileFormat.xlOpenXMLWorkbook);
             //workbook.Close( true, Filename );
             try
@@ -95,6 +99,77 @@ namespace OfficeTest
         }   // end: MenuQuit_Click
 
 
+
+        // ---------------------------------------------     window settings (Access)
+
+        /// <summary>
+        /// reads window position/size from the Access database and applies it
+        /// </summary>
+        private void LoadWindowSettings()
+        {
+            try
+            {
+                var values = SettingsDb.Load();
+                if (SettingsDb.TryGetDouble(values, "Window.Left", out double left) &&
+                    SettingsDb.TryGetDouble(values, "Window.Top", out double top) &&
+                    SettingsDb.TryGetDouble(values, "Window.Width", out double width) &&
+                    SettingsDb.TryGetDouble(values, "Window.Height", out double height) &&
+                    width >= MinWidth && height >= MinHeight)
+                {
+                    // only restore when the window is still visible on the (virtual) screen
+                    Rect screen = new Rect(SystemParameters.VirtualScreenLeft, SystemParameters.VirtualScreenTop,
+                                           SystemParameters.VirtualScreenWidth, SystemParameters.VirtualScreenHeight);
+                    if (screen.IntersectsWith(new Rect(left, top, width, height)))
+                    {
+                        WindowStartupLocation = WindowStartupLocation.Manual;
+                        Left = left;
+                        Top = top;
+                        Width = width;
+                        Height = height;
+                    }
+                }
+
+                if (values.TryGetValue("Window.State", out string? state) &&
+                    Enum.TryParse(state, out WindowState ws) && ws == WindowState.Maximized)
+                {
+                    WindowState = WindowState.Maximized;
+                }
+            }
+            catch (Exception ex)
+            {
+                Display("LoadWindowSettings: " + ex.Message);
+            }
+
+        }   // end: LoadWindowSettings
+
+        /// <summary>
+        /// writes window position/size into the Access database
+        /// </summary>
+        private void SaveWindowSettings()
+        {
+            try
+            {
+                // when maximized/minimized keep the "normal" bounds
+                Rect bounds = WindowState == WindowState.Normal
+                    ? new Rect(Left, Top, Width, Height)
+                    : RestoreBounds;
+
+                SettingsDb.Save(new Dictionary<string, string>
+                {
+                    ["Window.Left"] = SettingsDb.ToText(bounds.Left),
+                    ["Window.Top"] = SettingsDb.ToText(bounds.Top),
+                    ["Window.Width"] = SettingsDb.ToText(bounds.Width),
+                    ["Window.Height"] = SettingsDb.ToText(bounds.Height),
+                    ["Window.State"] = (WindowState == WindowState.Maximized
+                                        ? WindowState.Maximized : WindowState.Normal).ToString(),
+                });
+            }
+            catch (Exception ex)
+            {
+                Display("SaveWindowSettings: " + ex.Message);
+            }
+
+        }   // end: SaveWindowSettings
 
         // ---------------------------------------------     helper functions
 
@@ -147,6 +222,9 @@ namespace OfficeTest
         {
             // Add a new Excel workbook.
             workbook = excelApp.Workbooks.Add();
+            Excel.Worksheet worksheet =
+                workbook.Worksheets.Add();
+            worksheet.Name = "Testdaten";
             excelApp.Visible = true;
             excelApp.Range["A1"].Value = "Feld X";
             excelApp.Range["B1"].Value = "Feld Y";
